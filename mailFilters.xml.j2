@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:apps='http://schemas.google.com/apps/2006'>
+
+  <title>Mail Filters</title>
+  <author>
+    <name>Josh Preston</name>
+    <email>mrjoshuap@redhat.com</email>
+  </author>
+
+  <!-- Mailing Lists -->
+  {% for mailing_list in mailing_lists|sort(attribute='label') %}<entry>
+    <category term='filter'></category>
+    <title>Mail Filter</title>
+    <content></content>
+    <apps:property name='hasTheWord' value='{% for list_name in mailing_list.lists|sort %}{% if loop.index > 1 %} OR {% endif %}{{ "list:(%s)" | format(list_name | replace("@",".")) }}{% endfor %}'/>
+    <apps:property name='label' value='{{ mailing_list.label }}'/>
+    <apps:property name='shouldNeverSpam' value='{{ mailing_list.never_spam | default("true") }}'/>
+    <apps:property name='sizeOperator' value='s_sl'/>
+    <apps:property name='sizeUnit' value='s_smb'/>
+  </entry>
+  {% endfor %}
+
+  <!-- Customers -->
+  {% for customer in customers|sort(attribute='label') %}<entry>
+    <category term='filter'></category>
+    <title>Mail Filter</title>
+    <content></content>
+    <apps:property name='hasTheWord' value='{% for domain in customer.domains | sort %}{% if loop.index > 1 %} OR {% endif %}({{ "to:(*@%s)" | format(domain) }} OR {{ "from:(*@%s)" | format(domain) }}){% endfor %}'/>
+    <apps:property name='label' value='{{ customer.label }}'/>
+    <apps:property name='shouldArchive' value='{{ customer.skip_inbox | default("false") }}'/>
+    <apps:property name='shouldNeverSpam' value='{{ customer.never_spam | default("true") }}'/>
+    <apps:property name='sizeOperator' value='s_sl'/>
+    <apps:property name='sizeUnit' value='s_smb'/>
+  </entry>
+  {% endfor %}
+
+  <!-- Partners -->
+  {% for partner in partners|sort(attribute='label') %}<entry>
+    <category term='filter'></category>
+    <title>Mail Filter</title>
+    <content></content>
+    <apps:property name='hasTheWord' value='{% for domain in partner.domains|sort %}{% if loop.index > 1 %} OR {% endif %}({{ "to:(*@%s)" | format(domain) }} OR {{ "from:(*@%s)" | format(domain) }}){% endfor %}'/>
+    <apps:property name='label' value='{{ partner.label }}'/>
+    <apps:property name='shouldArchive' value='{{ partner.skip_inbox | default("false") }}'/>
+    <apps:property name='shouldNeverSpam' value='{{ partner.never_spam | default("true") }}'/>
+    <apps:property name='sizeOperator' value='s_sl'/>
+    <apps:property name='sizeUnit' value='s_smb'/>
+  </entry>
+  {% endfor %}
+
+  <!-- Ignore Chats -->
+  {% if filter_chats|default('true')|bool %}<entry>
+    <category term='filter'></category>
+    <title>Mail Filter</title>
+    <content></content>
+    <apps:property name='hasTheWord' value='in:chats'/>
+    <apps:property name='shouldArchive' value='true'/>
+    <apps:property name='sizeOperator' value='s_sl'/>
+    <apps:property name='sizeUnit' value='s_smb'/>
+  </entry>
+  {% endif %}
+
+  <!-- People -->
+  {% for person in people|sort(attribute='label') %}<entry>
+    <category term='filter'></category>
+    <title>Mail Filter</title>
+    <content></content>
+    <apps:property name='hasTheWord' value='{% for email in person.emails|sort %}{% if loop.index > 1 %} OR {% endif %}{{ "from:(%s)" | format(email) }}{% endfor %}'/>
+    <apps:property name='label' value='{{ person.label }}'/>
+    <apps:property name='shouldArchive' value='{{ person.skip_inbox | default("false") }}'/>
+    <apps:property name='shouldNeverSpam' value='{{ person.never_spam | default("true") }}'/>
+    <apps:property name='sizeOperator' value='s_sl'/>
+    <apps:property name='sizeUnit' value='s_smb'/>
+  </entry>
+  {% endfor %}
+
+  <!-- Archive Mailing Lists Catch-All -->
+  {% for mailing_list_batch in mailing_lists|selectattr('skip_inbox', 'equalto', 'true')|sort(attribute='label')|batch(mailing_list_archive_max_per_filter|int) %}<entry>
+    <category term='filter'></category>
+    <title>Mail Filter</title>
+    <content></content>
+    <apps:property name='hasTheWord' value='-({% for email in mailing_list_archive_ignore_emails_to|sort %}{% if loop.index > 1 %} OR {% endif %}{{ "to:(%s)" | format(email) }} OR {{ "cc:(%s)" | format(email) }} OR {{ "bcc:(%s)" | format(email) }}{% endfor %}) AND ({% for list_names in mailing_list_batch | map(attribute="lists") | list | sort %}{% set row_loop = loop %}{% if row_loop.index > 1 %} OR {% endif %}{% for list_name in list_names %}{% if loop.index > 1 %} OR {% endif %}{{ "list:(%s)" | format(list_name) }}{% endfor %}{% endfor %})'/>
+    <apps:property name='shouldArchive' value='true'/>
+    <apps:property name='sizeOperator' value='s_sl'/>
+    <apps:property name='sizeUnit' value='s_smb'/>
+  </entry>
+  {% endfor %}
+
+</feed>
