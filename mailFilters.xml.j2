@@ -65,7 +65,7 @@
     <category term='filter'></category>
     <title>Mail Filter</title>
     <content></content>
-    <apps:property name='hasTheWord' value='{% for email in person.emails|sort %}{% if loop.index > 1 %} OR {% endif %}{{ "from:(%s)" | format(email) }}{% endfor %}'/>
+    <apps:property name='hasTheWord' value='-(in:chats) AND ({% for email in person.emails|sort %}{% if loop.index > 1 %} OR {% endif %}{{ "from:(%s)" | format(email) }}{% endfor %})'/>
     <apps:property name='label' value='{{ person.label }}'/>
     <apps:property name='shouldArchive' value='{{ person.skip_inbox | default("false") }}'/>
     <apps:property name='shouldNeverSpam' value='{{ person.never_spam | default("true") }}'/>
