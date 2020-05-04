@@ -4,5 +4,12 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"ansibleVault.executable": "venv/bin/ansible-vault",
+		"ansibleVault.keyfile": ".vault-password",
+		"ansibleVaultInline.executable": "venv/bin/ansible-vault",
+		"ansibleVaultInline.keyfile": ".vault-password",
+		"python.pythonPath": "venv/bin/python",
+		"python.venvPath": "venv"
+	}
 }
