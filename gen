@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [[ -f /var/lib/awx/venv/ansible/bin/activate ]]; then
+    . /var/lib/awx/venv/ansible/bin/activate
+else
+    VENV="$(cd $(dirname $0) && pwd)/venv"
+    if [[ -f "$(cd $(dirname $0) && pwd)/.disable_venv" ]]; then
+        echo "Not using virtual environments"
+    elif [[ ! -f "$VENV/bin/activate" ]]; then
+        echo "Creating virtual environment $VENV"
+        python3 -m venv "$VENV"
+        . "$VENV/bin/activate"
+        pip3 install -r "$VENV/requirements.txt"
+    elif [[ -n "$VIRTUAL_ENV" && "$VIRTUAL_ENV" != "$VENV" ]]; then
+        echo "Activating virtual environment $VENV"
+        . "$VENV/bin/activate"
+    fi
+fi
+
+if [[ $(uname -s) == "Darwin" ]]; then
+    echo "Disable fork safety on MacOS"
+    export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+fi
+
+ansible --version
+
+exec ansible-playbook -i localhost, -e "ansible_python_interpreter=$(cd $(dirname $0) && pwd)/venv/bin/python" --vault-password-file=".vault-password" gen.yml
