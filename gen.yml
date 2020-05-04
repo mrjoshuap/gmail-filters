@@ -15,6 +15,18 @@
           - "filters.yml"
           - "encrypted-filters.yml"
 
+    - name: set author_name
+      set_fact:
+        author_name: Unknown Person
+      when:
+        - 'author_name is not defined'
+
+    - name: set author_email
+      set_fact:
+        author_email: unknown@localhost
+      when:
+        - 'author_email is not defined'
+
     - name: build out template
       template:
         src: mailFilters.xml.j2
