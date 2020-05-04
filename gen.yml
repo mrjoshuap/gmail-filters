@@ -1,7 +1,8 @@
 ---
 
 - name: Generate mail filters
-  hosts: localhost
+  hosts: all
+  connection: local
   become: no
   gather_facts: no
 
