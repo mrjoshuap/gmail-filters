@@ -28,6 +28,6 @@ if [ $(uname -s) == "Darwin" ]; then
     export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 fi
 
-ansible --version
+ansible-playbook --version
 
-exec ansible-playbook -i localhost, -e "ansible_python_interpreter=$(cd $(dirname $0) && pwd)/venv/bin/python" --vault-password-file=".vault-password" gen.yml
+exec ansible-playbook -i localhost, -e "ansible_python_interpreter=$VIRTUAL_ENV/bin/python" --vault-password-file=".vault-password" gen.yml
