@@ -1,12 +1,16 @@
 ---
 
 - name: Generate mail filters
-  hosts: all
+  hosts: localhost
   connection: local
   become: no
   gather_facts: no
 
   tasks:
+
+    - setup:
+        gather_subset:
+          - 'min'
 
     - name: include filters
       include_vars: "{{ lookup('first_found', possible_files) }}"
